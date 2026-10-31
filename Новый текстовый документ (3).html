@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Грибная энциклопедия</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #f4f1e8;
+    color: #2d3a1f;
+    line-height: 1.6;
+  }
+
+  header {
+    background: linear-gradient(135deg, #3e5c2f, #6b8e3d);
+    color: #fff;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+  }
+
+  header p { font-size: 1.1em; opacity: 0.9; }
+
+  nav {
+    background: #2d3a1f;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  nav a {
+    color: #d4e0b8;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+    padding: 5px 10px;
+  }
+
+  nav a:hover { color: #fff; border-bottom: 2px solid #a8c66c; }
+
+  .search-box {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 14px 20px;
+    border: 2px solid #6b8e3d;
+    border-radius: 30px;
+    font-size: 1em;
+    outline: none;
+    transition: 0.3s;
+  }
+
+  .search-box input:focus {
+    box-shadow: 0 0 10px rgba(107,142,61,0.5);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+  }
+
+ .card-img {
+  height: 180px;
+  overflow: hidden;
+  background: #e8f0d8;
+}
+
+.card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+  .card-body { padding: 20px; }
+
+  .card-body h3 {
+    color: #3e5c2f;
+    margin-bottom: 8px;
+    font-size: 1.3em;
+  }
+
+  .card-body .latin {
+    font-style: italic;
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .badge.edible { background: #d4edda; color: #155724; }
+  .badge.poison { background: #f8d7da; color: #721c24; }
+  .badge.conditional { background: #fff3cd; color: #856404; }
+
+  .card-body p {
+    font-size: 0.95em;
+    color: #555;
+  }
+
+  /* Модальное окно */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 15px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    position: relative;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 2em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: #3e5c2f; }
+
+  .modal h2 {
+    color: #3e5c2f;
+    margin-bottom: 5px;
+  }
+
+  .modal .latin {
+    font-style: italic;
+    color: #888;
+    margin-bottom: 15px;
+  }
+
+.modal-img {
+  width: 100%;
+  max-height: 350px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+  .modal-info {
+    margin-top: 20px;
+  }
+
+  .modal-info h4 {
+    color: #6b8e3d;
+    margin: 15px 0 8px;
+    border-bottom: 2px solid #e8f0d8;
+    padding-bottom: 5px;
+  }
+
+  .modal-info ul {
+    margin-left: 20px;
+  }
+
+  .modal-info li { margin-bottom: 5px; }
+
+  footer {
+    background: #2d3a1f;
+    color: #d4e0b8;
+    text-align: center;
+    padding: 25px;
+    margin-top: 50px;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-size: 1.2em;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍄 Грибная энциклопедия</h1>
+  <p>Справочник съедобных, условно-съедобных и ядовитых грибов</p>
+</header>
+
+<nav>
+  <a href="#" onclick="filterCards('all'); return false;">Все грибы</a>
+  <a href="#" onclick="filterCards('edible'); return false;">Съедобные</a>
+  <a href="#" onclick="filterCards('conditional'); return false;">Условно-съедобные</a>
+  <a href="#" onclick="filterCards('poison'); return false;">Ядовитые</a>
+</nav>
+
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="🔍 Поиск гриба по названию...">
+</div>
+
+<div class="container">
+  <div class="grid" id="grid"></div>
+  <div class="no-results" id="noResults">Ничего не найдено 🍂</div>
+</div>
+
+<footer>
+  <p>© 2026 Грибная энциклопедия | Учебный проект</p>
+  <p style="font-size:0.85em; margin-top:8px;">⚠️ Внимание: не собирайте грибы, если не уверены в их безопасности!</p>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+const mushrooms = [
+  {
+    name: "Белый гриб",
+    latin: "Boletus edulis",
+    type: "edible",
+    img: "Gribs/Белый гриб.webp",
+    short: "Царь грибов, ценится за отличный вкус и аромат.",
+    description: "Белый гриб считается самым ценным съедобным грибом. Шляпка от светло-коричневого до тёмно-бурого цвета, ножка толстая, белая.",
+    where: ["Хвойные и лиственные леса", "Образует симбиоз с дубом, берёзой, елью", "Растёт с июня по октябрь"],
+    howto: "Используется в свежем, сушёном, маринованном и замороженном виде. Не темнеет при сушке.",
+    danger: "Сложно спутать с ядовитыми, но можно перепутать с горчаком (несъедобен, очень горький)."
+  },
+  {
+    name: "Лисичка",
+    latin: "Cantharellus cibarius",
+    type: "edible",
+    emoji: "🧡",
+    short: "Ярко-жёлтый гриб, не бывает червивым.",
+    description: "Лисички растут большими группами, шляпка воронковидная, жёлто-оранжевая. Отличительная черта — не бывают червивыми и не темнеют при готовке.",
+    where: ["Смешанные и хвойные леса", "Растёт с июня по октябрь", "Любит влажные места"],
+    howto: "Жарят, маринуют, сушат. Перед готовкой рекомендуется замочить на 30 минут.",
+    danger: "Можно спутать с ложной лисичкой (несъедобна) — у неё пластинки, а не складки, и оранжево-красный цвет."
+  },
+  {
+    name: "Опёнок осенний",
+    latin: "Armillaria mellea",
+    type: "conditional",
+    emoji: "🍂",
+    short: "Растёт большими группами на пнях и деревьях.",
+    description: "Опёнок осенний растёт скученно на пнях, стволах, корнях. Шляпка медово-коричневая с чешуйками, ножка с кольцом.",
+    where: ["На пнях и живых деревьях", "Массово — с сентября по ноябрь"],
+    howto: "Требует тщательной обработки: отваривать 20–30 минут, воду сливать. Затем жарить, мариновать, сушить.",
+    danger: "Опасен ложный опёнок (ядовит) — у него нет кольца на ножке, шляпка ярко-жёлтая, пластинки зелёноватые."
+  },
+  {
+    name: "Подберёзовик",
+    latin: "Leccinum scabrum",
+    type: "edible",
+    emoji: "🤎",
+    short: "Растёт рядом с берёзами, ножка с чёрными чешуйками.",
+    description: "Шляпка от серо-коричневой до тёмно-коричневой, ножка длинная, белая с тёмными чешуйками. Образует симбиоз с берёзой.",
+    where: ["Берёзовые и смешанные леса", "С июня по октябрь"],
+    howto: "Жарят, варят, маринуют, сушат. При обработке может темнеть — это нормально.",
+    danger: "Практически не имеет ядовитых двойников."
+  },
+  {
+    name: "Подосиновик",
+    latin: "Leccinum aurantiacum",
+    type: "edible",
+    emoji: "🧡",
+    short: "Красная шляпка, растёт под осинами.",
+    description: "Шляпка красно-оранжевая, ножка с тёмными чешуйками. Растёт в симбиозе с осиной, реже с другими деревьями.",
+    where: ["Осиновые и смешанные леса", "С июня по сентябрь"],
+    howto: "Варят, жарят, маринуют, сушат. На срезе синеет — это нормально.",
+    danger: "Ядовитых двойников нет."
+  },
+  {
+    name: "Шампиньон",
+    latin: "Agaricus",
+    type: "edible",
+    emoji: "⚪",
+    short: "Известный культивируемый гриб.",
+    description: "Шляпка белая или кремовая, пластинки сначала розовые, потом коричневые. Широко культивируется.",
+    where: ["Луга, поля, сады", "Круглый год в теплицах"],
+    howto: "Универсален: жарка, варка, запекание, салаты.",
+    danger: "Можно спутать с бледной поганкой (смертельно ядовита)! У поганки пластинки всегда белые и есть вольва у основания."
+  },
+  {
+    name: "Бледная поганка",
+    latin: "Amanita phalloides",
+    type: "poison",
+    emoji: "☠️",
+    short: "Смертельно ядовитый гриб. Опаснее всего!",
+    description: "Шляпка оливково-зелёная или белая, пластинки белые, у основания — вольва (мешочек). Один из самых ядовитых грибов мира.",
+    where: ["Широколиственные леса", "С июня по октябрь"],
+    howto: "НЕ СЪЕДОБЕН. Даже кусочек вызывает необратимое поражение печени. Термическая обработка не помогает!",
+    danger: "Очень легко спутать с шампиньоном или сыроежкой. При малейших сомнениях — не брать!"
+  },
+  {
+    name: "Мухомор красный",
+    latin: "Amanita muscaria",
+    type: "poison",
+    emoji: "🔴",
+    short: "Классический ядовитый гриб с белыми точками.",
+    description: "Красная шляпка с белыми хлопьями, белая ножка с кольцом и вольвой. Содержит мускарин и иботеновую кислоту.",
+    where: ["Хвойные и лиственные леса", "С августа по октябрь"],
+    howto: "НЕ СЪЕДОБЕН. Вызывает галлюцинации, отравление, в тяжёлых случаях — смерть.",
+    danger: "Яркий, легко узнаваемый, но всё равно находятся желающие попробовать. Не делайте этого!"
+  },
+  {
+    name: "Мухомор пантерный",
+    latin: "Amanita pantherina",
+    type: "poison",
+    emoji: "🐆",
+    short: "Коричневая шляпка с белыми точками.",
+    description: "Шляпка коричневая с белыми хлопьями, ножка белая с кольцом. Очень ядовит.",
+    where: ["Широколиственные и хвойные леса", "С июля по октябрь"],
+    howto: "НЕ СЪЕДОБЕН. Сильное отравление, возможен летальный исход.",
+    danger: "Похож на некоторые съедобные грибы. Не собирайте коричневые грибы с белыми точками!"
+  },
+  {
+    name: "Сыроежка",
+    latin: "Russula",
+    type: "edible",
+    emoji: "🌈",
+    short: "Разноцветные шляпки, хрупкая мякоть.",
+    description: "Шляпки разных цветов: красные, жёлтые, зелёные, синие. Мякоть хрупкая, белая. Один из самых распространённых грибов.",
+    where: ["Все типы лесов", "С июня по октябрь"],
+    howto: "Варят, жарят, солят. Некоторые виды горчат — перед готовкой вымачивают.",
+    danger: "Можно спутать с бледной поганкой (белые формы). Всегда проверяйте пластинки и основание ножки!"
+  },
+  {
+    name: "Волнушка розовая",
+    latin: "Lactarius torminosus",
+    type: "conditional",
+    emoji: "🌸",
+    short: "Розовая шляпка с пушистым краем.",
+    description: "Шляпка розовая с концентрическими кругами, край мохнатый. Выделяет белый едкий млечный сок.",
+    where: ["Берёзовые и смешанные леса", "С июля по октябрь"],
+    howto: "Только соление после длительного вымачивания (2–3 дня) или отваривания. В свежем виде едкая.",
+    danger: "Требует обязательной предварительной обработки! В сыром виде вызывает раздражение ЖКТ."
+  },
+  {
+    name: "Маслёнок",
+    latin: "Suillus",
+    type: "edible",
+    emoji: "✨",
+    short: "Скользкая шляпка, растёт под соснами.",
+    description: "Шляпка покрыта слизью, цвет от жёлтого до коричневого. Растёт под соснами, часто большими группами.",
+    where: ["Сосновые леса", "С июня по октябрь"],
+    howto: "Перед готовкой снять кожицу со шляпки. Жарят, маринуют, сушат.",
+    danger: "Практически безопасен, но может вызывать послабление у чувствительных людей."
+  }
+];
+
+const typeLabels = {
+  edible: { text: "Съедобный", class: "edible" },
+  conditional: { text: "Условно-съедобный", class: "conditional" },
+  poison: { text: "Ядовитый", class: "poison" }
+};
+
+const grid = document.getElementById('grid');
+const noResults = document.getElementById('noResults');
+const searchInput = document.getElementById('searchInput');
+const modalOverlay = document.getElementById('modalOverlay');
+const modalContent = document.getElementById('modalContent');
+
+let currentFilter = 'all';
+
+function renderCards(filter = 'all', search = '') {
+  grid.innerHTML = '';
+  let visible = 0;
+
+  mushrooms.forEach((m, index) => {
+    const matchesFilter = filter === 'all' || m.type === filter;
+    const matchesSearch = m.name.toLowerCase().includes(search.toLowerCase()) ||
+                          m.latin.toLowerCase().includes(search.toLowerCase());
+
+    if (matchesFilter && matchesSearch) {
+      visible++;
+      const label = typeLabels[m.type];
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => openModal(index);
+      card.innerHTML = `
+  <div class="card-img">
+    <img src="${m.img}" alt="${m.name}">
+  </div>
+        <div class="card-body">
+          <span class="badge ${label.class}">${label.text}</span>
+          <h3>${m.name}</h3>
+          <div class="latin">${m.latin}</div>
+          <p>${m.short}</p>
+        </div>
+      `;
+      grid.appendChild(card);
+    }
+  });
+
+  noResults.style.display = visible === 0 ? 'block' : 'none';
+}
+
+function filterCards(type) {
+  currentFilter = type;
+  renderCards(type, searchInput.value);
+}
+
+function openModal(index) {
+  const m = mushrooms[index];
+  const label = typeLabels[m.type];
+  modalContent.innerHTML = `
+    <button class="modal-close" onclick="closeModal()">×</button>
+   <div class="modal-img">
+  <img src="${m.img}" alt="${m.name}">
+    </div>
+    <h2>${m.name}</h2>
+    <div class="latin">${m.latin}</div>
+    <span class="badge ${label.class}">${label.text}</span>
+    <p style="margin-top:15px;">${m.description}</p>
+    <div class="modal-info">
+      <h4>📍 Где растёт</h4>
+      <ul>${m.where.map(w => `<li>${w}</li>`).join('')}</ul>
+      <h4>🍳 Как используют</h4>
+      <p>${m.howto}</p>
+      <h4>⚠️ Опасность / двойники</h4>
+      <p>${m.danger}</p>
+    </div>
+  `;
+  modalOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) closeModal();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+searchInput.addEventListener('input', (e) => {
+  renderCards(currentFilter, e.target.value);
+});
+
+renderCards();
+</script>
+</body>
+</html>
